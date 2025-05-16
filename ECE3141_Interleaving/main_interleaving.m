@@ -59,7 +59,10 @@ received_deinterleave = decode(block_deinterleave, 7, 4, 'hamming') ;
 %Calculate BER - 
 block_received_trimmed = received_deinterleave(1:N);
 [block_ber, block_numErrors] = compute_ber(data, block_received_trimmed);
-
+figure
+plot(1:1000,data-block_received_trimmed,"o")
+string=sprintf("The original data minus the decoded data， bit error rate is %.4f",block_ber);
+title(string)
 % Display result
 fprintf('--- Block Interleaved ---\n BER = %.4f, Errors = %d\n', block_ber, block_numErrors);
 
@@ -72,8 +75,10 @@ conv_encode= encode(data,7,4,'hamming') ;
 %Apply block interleaving - 
 
 nrows = 5; % Use 5 shift registers
-slope = 8; % Delays are 0, 3, 6, 9, and 12.
-conv_interleave = convintrlv(conv_encode,nrows,slope);
+slope = 3; % Delays are 0, 3, 6, 9, and 12
+delay=nrows*(nrows-1)*slope;  
+padded = [ conv_encode, zeros(1, delay) ];
+conv_interleave = convintrlv(padded,nrows,slope);
 
 %Intentionally corrupt bits - 
 
@@ -83,12 +88,16 @@ conv_error_interleave = burst_error(conv_interleave, burst_length, burst_freq) ;
 
 conv_deinterleave = convdeintrlv(conv_error_interleave,nrows,slope) ;
 
+conv_deinterleave = conv_deinterleave(delay+1 : delay+length(conv_encode));
 %Decode ECC - 
 conv_received_interleave = decode(conv_deinterleave, 7, 4, 'hamming') ; 
 
 % Calculate BER - 
 
 [conv_ber, conv_numErrors] = compute_ber(data,conv_received_interleave);
-
+figure
+plot(1:1000,data-conv_received_interleave,"o")
+string=sprintf("The original data minus the decoded data， bit error rate is %.4f",conv_ber);
+title(string)
 % Display result
 fprintf('--- Convolutional Interleaved ---\n BER = %.4f, Errors = %d\n', conv_ber, conv_numErrors);
