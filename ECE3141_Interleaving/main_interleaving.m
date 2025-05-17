@@ -1,7 +1,7 @@
 %% ECE3141 PROJECT, Xiaofan Hua - 33809852, Malik Hassaan Khan- 33636729 
 % Interleaving project - 
 
-clc ; clear ; close all ; 
+
 
 %Generate block of data - 
 N= 1000 ; 
@@ -11,9 +11,9 @@ burst_length = 5 ;
 
 %% Non-interleaved block of data - 
  
-% Apply the hamming code - (ECC)
+% Apply the hamming code - (ECC) 
 
-codeword = encode(data,7,4,'hamming') ;
+codeword = encode(data,7,4,'hamming') ; 
 
 %Intentionally corrupt bits - 
 
@@ -29,7 +29,7 @@ received_trimmed = received_codeword(1:N);
 [ber, numErrors] = compute_ber(data, received_trimmed);
 
 % Display result
-fprintf('--- Non-Interleaved ---\n BER = %.4f, Errors = %d\n', ber, numErrors);
+fprintf('--- Non-Interleaved, Burst Length = %d ---\n BER = %.4f, Errors = %d\n', burst_length, ber, numErrors);
 
 %% Block Interleaving applied to data - 
 
@@ -41,8 +41,8 @@ fprintf("%d\n", length(codeword_interleave)) ;
 
 %Apply block interleaving - 
 
-rows1 = 350 ; 
-cols1 = 5 ; 
+rows1 = 70 ; 
+cols1 = 25 ; 
 block_interleave = matintrlv(codeword_interleave,rows1,cols1) ; 
 
 %Intentionally corrupt bits - 
@@ -61,10 +61,10 @@ block_received_trimmed = received_deinterleave(1:N);
 [block_ber, block_numErrors] = compute_ber(data, block_received_trimmed);
 figure
 plot(1:1000,data-block_received_trimmed,"o")
-string=sprintf("The original data minus the decoded data， bit error rate is %.4f",block_ber);
+string=sprintf(" Block interleaving : Bit error rate is %.4f",block_ber);
 title(string)
 % Display result
-fprintf('--- Block Interleaved ---\n BER = %.4f, Errors = %d\n', block_ber, block_numErrors);
+fprintf('--- Block Interleaved, Burst Depth = %d ---\n BER = %.4f, Errors = %d\n',cols1, block_ber, block_numErrors);
 
 %% Convolutional Interleaving applied to data - 
 
@@ -97,7 +97,7 @@ conv_received_interleave = decode(conv_deinterleave, 7, 4, 'hamming') ;
 [conv_ber, conv_numErrors] = compute_ber(data,conv_received_interleave);
 figure
 plot(1:1000,data-conv_received_interleave,"o")
-string=sprintf("The original data minus the decoded data， bit error rate is %.4f",conv_ber);
+string=sprintf("Convolutional Interleaving - Bit error rate is %.4f",conv_ber);
 title(string)
 % Display result
-fprintf('--- Convolutional Interleaved ---\n BER = %.4f, Errors = %d\n', conv_ber, conv_numErrors);
+fprintf('--- Convolutional Interleaved, Burst Length = %.4f ---\n BER = %.4f, Errors = %d\n', burst_length, conv_ber, conv_numErrors);
